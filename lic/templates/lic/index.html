@@ -1,0 +1,14 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'lic/style.css' %}" />
+{% if client_list %}
+    <table id="customers">
+    {% for client in client_list %}
+        <tr>
+            <td><a href="{% url 'lic:client_detail' client.id %}">{{ client.first_name }}</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No Clients registered.</p>
+{% endif %}
