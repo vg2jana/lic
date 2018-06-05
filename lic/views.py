@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.views import generic
 from .models import Client, Policy
 
-class IndexView(generic.ListView):
-    template_name = 'lic/index.html'
+class Clients(generic.ListView):
+    template_name = 'lic/clients.html'
     # DOCS: Context object is client_list
     context_object_name = 'client_list'
 
@@ -39,9 +39,9 @@ class PolicyDetailView(generic.DetailView):
 
 
 def index(request):
-    template = loader.get_template('lic/index.html')
+    template = loader.get_template('lic/base.html')
     context = {
-        'client_list': Client.objects.all(),
+        #'client_list': Client.objects.all(),
     }
     return HttpResponse(template.render(context, request))
 

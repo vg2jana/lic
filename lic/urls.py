@@ -5,7 +5,16 @@ from . import views
 app_name = "lic"
 urlpatterns = [
     # Root page
-    path('', views.IndexView.as_view(), name='index'),
+    path('', views.index, name='index'),
+
+    # Clients page
+    path('clients', views.Clients.as_view(), name='clients'),
+
+    # Root page
+    path('reminders', views.index, name='reminders'),
+
+    # Root page
+    path('status', views.index, name='status'),
 
     # Client details page
     path('<int:pk>/', views.ClientDetailView.as_view(), name='client_detail'),
