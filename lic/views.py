@@ -8,14 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from .models import Client, Policy
-
-class Clients(generic.ListView):
-    template_name = 'lic/clients.html'
-    # DOCS: Context object is client_list
-    context_object_name = 'client_list'
-
-    def get_queryset(self):
-        return Client.objects.order_by('-first_name')
+from django_tables2 import RequestConfig
 
 
 class ClientDetailView(generic.DetailView):
@@ -24,12 +17,12 @@ class ClientDetailView(generic.DetailView):
     template_name = 'lic/client_detail.html'
 
     # Use this to pass any extra information
-    #def get_context_data(self, **kwargs):
-    #    # Call the base implementation first to get a context
-    #    context = super().get_context_data(**kwargs)
-    #    # Add in a QuerySet of all the books
-    #    context['full_name'] = " Hi"
-    #    return context
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        #context['policies'] = Client.policy_set.all()
+        return context
 
 
 class PolicyDetailView(generic.DetailView):
@@ -42,6 +35,14 @@ def index(request):
     template = loader.get_template('lic/base.html')
     context = {
         #'client_list': Client.objects.all(),
+    }
+    return HttpResponse(template.render(context, request))
+
+def all_clients(request):
+    template = loader.get_template('lic/clients.html')
+    context = {
+        'client_list': Client.objects.all(),
+        'column_names': ("Name", "Customer ID", "Email ID", "Mobile number", "Enrolled Policies")
     }
     return HttpResponse(template.render(context, request))
 

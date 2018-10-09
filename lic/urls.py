@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.index, name='index'),
 
     # Clients page
-    path('clients', views.Clients.as_view(), name='clients'),
+    path('clients', views.all_clients, name='all_clients'),
 
     # Root page
     path('reminders', views.index, name='reminders'),
@@ -17,7 +17,7 @@ urlpatterns = [
     path('status', views.index, name='status'),
 
     # Client details page
-    path('<int:pk>/', views.ClientDetailView.as_view(), name='client_detail'),
+    path('<int:client_id>/', views.client_detail, name='client_detail'),
 
     # Policy details page
     path('<int:pk>/', views.PolicyDetailView.as_view(), name='policy_detail')
