@@ -20,6 +20,13 @@ class Client(models.Model):
     def __str__(self):
         return "{} {} ({})".format(str(self.first_name), str(self.last_name), str(self.customer_id))
 
+    def full_name(self):
+        if self.gender == 'M':
+            title = 'Mr.'
+        else:
+            title = 'Mrs.'
+        return "{} {} {}".format(title, str(self.first_name), str(self.last_name))
+
 
 class Policy(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
@@ -102,6 +109,9 @@ class Due(models.Model):
             return "Paid"
         else:
             return "Not Paid"
+
+    def grace_date(self):
+        return self.due_date + relativedelta(months=1)
 
     def is_reminder_needed(self):
         if self.reminder_set.exists() is False:

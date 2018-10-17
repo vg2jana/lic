@@ -1,6 +1,7 @@
 import os
 from django_cron import CronJobBase, Schedule
 from lic.models import Policy, Due, Reminder
+from lic.sendmail_html import send_reminder_mail
 
 class SampleCronJob(CronJobBase):
     RUN_EVERY_MINS = 120 # every 2 hours
@@ -19,3 +20,4 @@ class SampleCronJob(CronJobBase):
     def do(self):
         self.create_dues()
         self.create_reminders()
+        send_reminder_mail(Reminder.objects.all())
