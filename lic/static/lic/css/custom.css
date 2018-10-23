@@ -34,3 +34,12 @@
     background-color: darkorange;
     color: white;
 }
+
+.pencil-icon {
+    content: url("/static/lic/images/pencil.svg");
+    /*margin-top: 10px;*/
+    /*margin-bottom: 10px;*/
+    max-width: 10px;
+    max-height: 10px;
+    cursor: pointer;
+}
