@@ -1,9 +1,9 @@
 import smtplib
 import email.message
+import datetime
 
 from_addr = 'chsharemovie@gmail.com'
 from_passwd = 'share1234'
-import pdb
 
 def create_mail_content(reminders):
     html = """
@@ -14,7 +14,7 @@ def create_mail_content(reminders):
     <title>LIC Policy Payment Reminder</title>
     <style type="text/css">
     #policys {
-        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        font-family: Tahoma, Geneva, sans-serif;
         border-collapse: collapse;
         width: 100%;
     }
@@ -28,6 +28,10 @@ def create_mail_content(reminders):
         text-align: left;
         background-color: darkblue;
         color: white;
+        font-weight: 14;
+    }
+    #policys td {
+        font-weight: 12;
     }
     </style>
     </head>
@@ -78,6 +82,10 @@ def create_mail_content(reminders):
     return html.replace('-policy_rows-', policy_rows)
 
 def send_reminder_mail(reminders):
+    if len(reminders) == 0:
+        print('No reminders pending.')
+        return
+
     mail_addresses = {}
     for reminder in reminders:
         email_id = reminder.email
@@ -85,23 +93,32 @@ def send_reminder_mail(reminders):
             mail_addresses[email_id] = []
         mail_addresses[email_id].append(reminder)
 
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(from_addr, from_passwd)
+    except:
+        print('Something went wrong...')
+        raise
+
     for email_id, reminders in mail_addresses.items():
         msg = email.message.Message()
-        due_date = reminders[0].due.due_date
-        msg['Subject'] = "LIC policy Renewal Premium Intimation for {} {}".format(due_date.strftime('%B'), due_date.strftime('%Y'))
+        # due_date = reminders[0].due.due_date
+        # msg['Subject'] = "LIC policy Renewal Premium Intimation for {} {}".format(due_date.strftime('%B'), due_date.strftime('%Y'))
+        msg['Subject'] = "LIC policy Renewal Premium Intimation for {}".format(datetime.datetime.now().strftime("%B %Y"))
         msg['From'] = from_addr
         msg['To'] = email_id
         html = create_mail_content(reminders)
         msg.add_header('Content-Type', 'text/html')
         msg.set_payload(html)
         try:
-            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-            server.ehlo()
-            server.login(from_addr, from_passwd)
             server.sendmail(from_addr, email_id, msg.as_string())
             server.close()
-
-            print('Email sent!')
         except:
             print('Something went wrong...')
             raise
+        for r in reminders:
+            r.reminder_sent = True
+            r.save()
+
+    print('Email sent!')

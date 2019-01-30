@@ -80,10 +80,13 @@ def due_json(request, pk):
 def due_submit(request, pk):
     if request.method == 'POST':
         data = request.POST
-        print(data)
         premium_paid = data.get('premiumPaid')
         due = Due.objects.get(id=pk)
         if premium_paid is not due.premium_paid:
             due.premium_paid = premium_paid
             due.save()
+        if due.premium_paid is False:
+            for reminder in due.reminder_set.all():
+                reminder.reminder_sent = False
+                reminder.save()
         return dues(request)
