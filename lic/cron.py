@@ -7,7 +7,7 @@ from lic.models import Policy, Due, Reminder
 from lic.sendmail_html import send_reminder_mail
 
 class SampleCronJob(CronJobBase):
-    RUN_EVERY_MINS = 120 # every 2 hours
+    RUN_EVERY_MINS = 1440 # every 24 hours
 
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'lic.sampleCron'
