@@ -18,20 +18,22 @@ def create_mail_content(reminders):
         border-collapse: collapse;
         width: 100%;
     }
-    #policys td, #policys th {
-        border: 2px solid #ddd;
-        padding: 8px;
-    }
     #policys th {
-        padding-top: 12px;
-        padding-bottom: 12px;
+        padding: 4px;
         text-align: left;
         background-color: darkblue;
         color: white;
-        font-weight: 14;
+        font-size: 120%;
+        border: 2px solid #ddd;
     }
-    #policys td {
-        font-weight: 12;
+    #policys tr td {
+        font-size: 110%;
+        border: 2px solid #ddd;
+    }
+    
+    body {
+        font-size: 110%;
+        font-family: Tahoma, Geneva, sans-serif;
     }
     </style>
     </head>

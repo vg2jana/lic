@@ -41,6 +41,7 @@ class Policy(models.Model):
     premium_amount = models.IntegerField()
     start_date = models.DateField(default=datetime.now)
     end_date = models.DateField(default=datetime.now)
+    added_date = models.DateField(default=datetime.now)
 
     def __str__(self):
         return str(self.number)
@@ -89,7 +90,10 @@ class Policy(models.Model):
             return
 
         due_date = date(due_date.year, due_date.month, 28)
-        Due.objects.create(policy=self, due_date=due_date)
+        premium_paid = False
+        if due_date < self.added_date:
+            premium_paid = True
+        Due.objects.create(policy=self, due_date=due_date, premium_paid=premium_paid)
         self.create_due()
 
     def is_paid(self):
@@ -105,7 +109,7 @@ class Due(models.Model):
         return "Policy({}) Due_date: {}".format(self.policy.number, self.due_date)
 
     def paid(self):
-        if self.premium_paid == True:
+        if self.premium_paid is True:
             return "Paid"
         else:
             return "Not Paid"
@@ -114,6 +118,9 @@ class Due(models.Model):
         return self.due_date + relativedelta(months=1)
 
     def is_reminder_needed(self):
+        if self.premium_paid is True:
+            return False
+
         if self.reminder_set.exists() is False:
             return True
 
@@ -126,14 +133,26 @@ class Due(models.Model):
         return True
 
     def create_reminder(self):
-        if self.is_reminder_needed() is False:
-            return
-
-        reminder_day = self.reminder_days_before[self.reminder_set.count()]
-        reminder_date = self.due_date + relativedelta(days=reminder_day)
         client = self.policy.client
-        Reminder.objects.create(due=self, reminder_date=reminder_date,
-                                mobile_number=client.mobile_number, email=client.email)
+        if self.due_date < date.today() and self.premium_paid is False:
+            due_date = None
+            if self.reminder_set.exists() is True:
+                last_reminder_date = self.reminder_set.latest('reminder_date').reminder_date
+                days_after_last_reminder = abs(relativedelta(dt1=last_reminder_date, dt2=date.today()).days)
+                if days_after_last_reminder >= 30:
+                    due_date = date.today()
+            else:
+                due_date = date.today()
+
+            if due_date is not None:
+                Reminder.objects.create(due=self, reminder_date=due_date,
+                                        mobile_number=client.mobile_number, email=client.email)
+        elif self.is_reminder_needed() is True:
+            reminder_day = self.reminder_days_before[self.reminder_set.count()]
+            reminder_date = self.due_date + relativedelta(days=reminder_day)
+            Reminder.objects.create(due=self, reminder_date=reminder_date,
+                                    mobile_number=client.mobile_number, email=client.email)
+
 
 class Reminder(models.Model):
     due = models.ForeignKey(Due, on_delete=models.CASCADE)
