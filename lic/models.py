@@ -1,7 +1,7 @@
 from django.db import models
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import pdb
+import ast
 
 # Create your models here.
 class Client(models.Model):
@@ -28,8 +28,44 @@ class Client(models.Model):
         return "{} {} {}".format(title, str(self.first_name), str(self.last_name))
 
 
+class PolicyType(models.Model):
+    policy_name = models.CharField(max_length=200)
+    policy_type_choices = (
+        ("E", "Email"),
+        ("P", "PDF Generation")
+    )
+    action_items = models.CharField(max_length=100, blank=True, verbose_name="Select actions that apply to this policy type")
+    type_choices = (
+        ("H", "Health Insurance"),
+        ("G", "General Insurance")
+    )
+    policy_type = models.CharField(max_length=1, choices=type_choices, default="H")
+
+    def __str__(self):
+        return str(self.policy_name)
+
+    def email_args(self):
+        return {
+            "email_before": (-15, -2),
+        }
+
+    def actions(self):
+        action_items = ast.literal_eval(self.action_items)
+        actions = {}
+        if 'E' in action_items:
+            email_args = self.email_args()
+            if email_args is not None:
+                actions.update(email_args)
+        return actions
+
+    def actions_choices_text(self):
+        text_list = [str(x) for x in self.action_items.split(',')]
+        return ','.join(text_list)
+
+
 class Policy(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    policy_type = models.ForeignKey(PolicyType, on_delete=models.CASCADE)
     number = models.IntegerField()
     name = models.CharField(max_length=200)
     term_choices = (
@@ -103,7 +139,6 @@ class Due(models.Model):
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
     premium_paid = models.BooleanField(default=False)
     due_date = models.DateField()
-    reminder_days_before = (-15, -2)
 
     def __str__(self):
         return "Policy({}) Due_date: {}".format(self.policy.number, self.due_date)
@@ -117,6 +152,9 @@ class Due(models.Model):
     def grace_date(self):
         return self.due_date + relativedelta(months=1)
 
+    def email_before(self):
+        return self.policy.policy_type.actions().get('email_before')
+
     def is_reminder_needed(self):
         if self.premium_paid is True:
             return False
@@ -124,7 +162,7 @@ class Due(models.Model):
         if self.reminder_set.exists() is False:
             return True
 
-        if self.reminder_set.count() >= len(self.reminder_days_before):
+        if self.reminder_set.count() >= len(self.email_before()):
             return False
 
         if self.reminder_set.filter(reminder_sent__exact=False).count() > 0:
@@ -148,7 +186,7 @@ class Due(models.Model):
                 Reminder.objects.create(due=self, reminder_date=due_date,
                                         mobile_number=client.mobile_number, email=client.email)
         elif self.is_reminder_needed() is True:
-            reminder_day = self.reminder_days_before[self.reminder_set.count()]
+            reminder_day = self.email_before()[self.reminder_set.count()]
             reminder_date = self.due_date + relativedelta(days=reminder_day)
             Reminder.objects.create(due=self, reminder_date=reminder_date,
                                     mobile_number=client.mobile_number, email=client.email)
