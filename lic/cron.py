@@ -5,6 +5,7 @@ import datetime
 from django_cron import CronJobBase, Schedule
 from lic.models import Policy, Due, Reminder
 from lic.sendmail_html import send_reminder_mail
+from dateutil.relativedelta import relativedelta
 
 class SampleCronJob(CronJobBase):
     RUN_EVERY_MINS = 1440 # every 24 hours
@@ -22,11 +23,20 @@ class SampleCronJob(CronJobBase):
 
     def do(self):
         self.create_dues()
-        self.create_reminders()
-        reminders = []
-        for reminder in Reminder.objects.all():
-            if reminder.reminder_date <= datetime.date.today() and \
-                reminder.due.premium_paid is False and \
-                    reminder.reminder_sent is False:
-                reminders.append(reminder)
-        send_reminder_mail(reminders)
+
+        email_dues_list = []
+        for due in Due.objects.filter(policy__policy_type__action_items__contains="Email",policy__due__premium_paid=False):
+            yes = False
+            r_set = due.reminder_set
+            actions = due.policy.policy_type.actions()
+            due_date = due.due_date
+
+            # Is due date already past then send a reminder within a month
+
+            if r_set.count() < len(actions.get('email_before', [])):
+                yes = True
+
+            if r_set.count() > 0:
+                r = r_set.latest("-reminder_sent")
+                days_after_last_reminder = abs(relativedelta(dt1=last_reminder_date, dt2=date.today()).days)
+

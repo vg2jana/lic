@@ -28,8 +28,43 @@ class Client(models.Model):
         return "{} {} {}".format(title, str(self.first_name), str(self.last_name))
 
 
+class PolicyType(models.Model):
+    type_choices = (
+        ("H", "Health Insurance"),
+        ("G", "General Insurance")
+    )
+    action_items_choices = (
+        ("E", "Email"),
+        ("P", "PDF Generation")
+    )
+    policy_name = models.CharField(max_length=200)
+    policy_type = models.CharField(max_choices=50, choices=type_choices, default="H")
+    action_items = models.CharField(max_choices=50, choices=action_items_choices)
+
+    def __str__(self):
+        return str(self.policy_name)
+
+    def email_args(self):
+        return {
+            "email_before": (-15, -2),
+        }
+
+    def actions(self):
+        actions = {}
+        if 'E' in self.action_items:
+            email_args = self.email_args()
+            if email_args is not None:
+                actions.update(email_args)
+        return actions
+
+    def actions_choices_text(self):
+        text_list = [str(x) for x in self.action_items.split(',')]
+        return ','.join(text_list)
+
+
 class Policy(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    policy_type = models.ForeignKey(PolicyType, on_delete=models.CASCADE)
     number = models.IntegerField()
     name = models.CharField(max_length=200)
     term_choices = (
@@ -96,14 +131,13 @@ class Policy(models.Model):
         Due.objects.create(policy=self, due_date=due_date, premium_paid=premium_paid)
         self.create_due()
 
-    def is_paid(self):
-        return self.latest_due().paid
+    # def is_paid(self):
+    #     return self.latest_due().paid
 
 class Due(models.Model):
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
     premium_paid = models.BooleanField(default=False)
     due_date = models.DateField()
-    reminder_days_before = (-15, -2)
 
     def __str__(self):
         return "Policy({}) Due_date: {}".format(self.policy.number, self.due_date)
@@ -117,50 +151,50 @@ class Due(models.Model):
     def grace_date(self):
         return self.due_date + relativedelta(months=1)
 
-    def is_reminder_needed(self):
-        if self.premium_paid is True:
-            return False
-
-        if self.reminder_set.exists() is False:
-            return True
-
-        if self.reminder_set.count() >= len(self.reminder_days_before):
-            return False
-
-        if self.reminder_set.filter(reminder_sent__exact=False).count() > 0:
-            return False
-
-        return True
-
-    def create_reminder(self):
-        client = self.policy.client
-        if self.due_date < date.today() and self.premium_paid is False:
-            due_date = None
-            if self.reminder_set.exists() is True:
-                last_reminder_date = self.reminder_set.latest('reminder_date').reminder_date
-                days_after_last_reminder = abs(relativedelta(dt1=last_reminder_date, dt2=date.today()).days)
-                if days_after_last_reminder >= 30:
-                    due_date = date.today()
-            else:
-                due_date = date.today()
-
-            if due_date is not None:
-                Reminder.objects.create(due=self, reminder_date=due_date,
-                                        mobile_number=client.mobile_number, email=client.email)
-        elif self.is_reminder_needed() is True:
-            reminder_day = self.reminder_days_before[self.reminder_set.count()]
-            reminder_date = self.due_date + relativedelta(days=reminder_day)
-            Reminder.objects.create(due=self, reminder_date=reminder_date,
-                                    mobile_number=client.mobile_number, email=client.email)
+    # def is_reminder_needed(self):
+    #     if self.premium_paid is True:
+    #         return False
+    #
+    #     if self.reminder_set.exists() is False:
+    #         return True
+    #
+    #     if self.reminder_set.count() >= len(self.reminder_days_before):
+    #         return False
+    #
+    #     if self.reminder_set.filter(reminder_sent__exact=False).count() > 0:
+    #         return False
+    #
+    #     return True
+    #
+    # def create_reminder(self):
+    #     client = self.policy.client
+    #     if self.due_date < date.today() and self.premium_paid is False:
+    #         due_date = None
+    #         if self.reminder_set.exists() is True:
+    #             last_reminder_date = self.reminder_set.latest('reminder_date').reminder_date
+    #             days_after_last_reminder = abs(relativedelta(dt1=last_reminder_date, dt2=date.today()).days)
+    #             if days_after_last_reminder >= 30:
+    #                 due_date = date.today()
+    #         else:
+    #             due_date = date.today()
+    #
+    #         if due_date is not None:
+    #             Reminder.objects.create(due=self, reminder_date=due_date,
+    #                                     mobile_number=client.mobile_number, email=client.email)
+    #     elif self.is_reminder_needed() is True:
+    #         reminder_day = self.reminder_days_before[self.reminder_set.count()]
+    #         reminder_date = self.due_date + relativedelta(days=reminder_day)
+    #         Reminder.objects.create(due=self, reminder_date=reminder_date,
+    #                                 mobile_number=client.mobile_number, email=client.email)
 
 
 class Reminder(models.Model):
     due = models.ForeignKey(Due, on_delete=models.CASCADE)
-    reminder_sent = models.BooleanField(default=False)
     reminder_date = models.DateField()
     mobile_number = models.IntegerField()
     email = models.EmailField()
+    actions_taken = models.TextField()
+    remarks = models.TextField()
 
     def __str__(self):
-        return 'Policy({}), Policy_Due_Date={}, Reminder_date={}'.format(self.due.policy.number,
-                                                                         self.due.due_date, self.reminder_date)
+        return 'Policy({}), Due_Date({})'.format(self.due.policy.number, self.due.due_date)
