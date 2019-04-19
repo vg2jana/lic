@@ -59,7 +59,7 @@ class Policy(models.Model):
 
     def latest_due(self):
         if not self.due_exists():
-            Due.objects.create(policy=self, due_date=self.start_date)
+            self.create_due()
         return self.due_set.latest('due_date')
 
     def next_due_date(self):
