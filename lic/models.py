@@ -115,7 +115,11 @@ class Due(models.Model):
             return "Not Paid"
 
     def grace_date(self):
-        return self.due_date + relativedelta(months=1)
+        grace_date = self.due_date + relativedelta(months=1)
+        return grace_date.strftime('%d/%m/%Y')
+
+    def due_date_formatted(self):
+        return self.due_date.strftime('%d/%m/%Y')
 
     def is_reminder_needed(self):
         if self.premium_paid is True:

@@ -1,27 +1,38 @@
 {% extends "lic/base.html" %}
 {% load static %}
 
+{% block extra_js %}
+    <script type="text/javascript" src="{% static 'lic/js/clients.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lic/Datatables/datatables.min.js' %}"></script>
+{% endblock %}
 
 {% block content %}
     <link rel="stylesheet" type="text/css" href="{% static 'lic/css/table.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'lic/Datatables/datatables.min.css' %}"/>
     {% if client_list %}
         <table id="customers">
-        {% for column in column_names %}
-            <th>{{ column }}</th>
-        {% endfor %}
-        {% for client in client_list %}
-            <tr>
-                <td><a href="{% url 'lic:client_detail' client.id %}">{{ client.first_name }} {{ client.last_name }}</a></td>
-                <td>{{ client.customer_id }}</td>
-                <td>{{ client.email }}</td>
-                <td>{{ client.mobile_number }}</td>
-                <td>
-                    {% for policy in client.policy_set.all %}
-                        {{ policy.number }}<br/>
-                    {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
+            <thead>
+                <tr>
+                {% for column in column_names %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for client in client_list %}
+                <tr>
+                    <td><a href="{% url 'lic:client_detail' client.id %}">{{ client.first_name }} {{ client.last_name }}</a></td>
+                    <td>{{ client.customer_id }}</td>
+                    <td>{{ client.email }}</td>
+                    <td>{{ client.mobile_number }}</td>
+                    <td>
+                        {% for policy in client.policy_set.all %}
+                            {{ policy.number }}<br/>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
         </table>
     {% else %}
         <p>No Clients registered.</p>

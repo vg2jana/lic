@@ -78,7 +78,7 @@ def create_mail_content(reminders):
         p = r.due.policy
         d = r.due
         due_date = d.due_date.strftime('%d/%m/%Y')
-        grace_date = d.grace_date().strftime('%d/%m/%Y')
+        grace_date = d.grace_date()
         policy_rows += policy_row.format(p.client.full_name(), p.number, due_date, grace_date, 'Rs. ' + str(p.premium_amount))
 
     return html.replace('-policy_rows-', policy_rows)

@@ -10,7 +10,7 @@ function populate_due_modal(due_id) {
             document.getElementById('staticEmail').value = data['email'];
             document.getElementById('staticMobile').value = data['mobile'];
             document.getElementById('staticPolicy').value = data['policy'];
-            if (data['paid'] === 'Paid') {
+            if (data['paid'] === 'Already Paid') {
                 document.getElementById('premiumPaid').checked = true;
             } else {
                 document.getElementById('premiumUnPaid').checked = true;
@@ -31,7 +31,7 @@ $(document).ready( function () {
                 '</a>';
         } else {
             element.innerHTML = '<a href="" data-toggle="modal" data-target="#duemodal" class="btn btn-success btn-sm">' +
-                '<span class="pencil-icon" aria-hidden="true"></span> Paid' +
+                '<span class="pencil-icon" aria-hidden="true"></span> Already Paid' +
                 '</a>';
         }
     }
@@ -64,4 +64,10 @@ $(document).ready( function () {
         });
         return false;
     });
+
+    // Date formatted sort
+    $.fn.dataTable.moment( 'DD/MM/YYYY' );
+    // Apply DataTable
+    $('#customers').DataTable();
+
 } );

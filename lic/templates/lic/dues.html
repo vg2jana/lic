@@ -3,11 +3,15 @@
 
 {% block extra_js %}
     <script type="text/javascript" src="{% static 'lic/js/due.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lic/Datatables/datatables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lic/js/moment.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lic/js/datetime-moment.js' %}"></script>
 {% endblock %}
 
 {% block content %}
     <link rel="stylesheet" type="text/css" href="{% static 'lic/css/table.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'lic/css/custom.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'lic/Datatables/datatables.min.css' %}"/>
     {% if due_list %}
         <!-- Modal for Due edit -->
         <div>
@@ -53,7 +57,7 @@
                                       <div class="col-sm-6 due-form-premium">
                                         <div class="form-check">
                                           <input class="form-check-input" type="radio" name="premiumPaid" id="premiumPaid" value=True>
-                                          <label class="form-check-label" for="premiumPaid">Paid</label>
+                                          <label class="form-check-label" for="premiumPaid">Already Paid</label>
                                         </div>
                                         <div class="form-check">
                                           <input class="form-check-input" type="radio" name="premiumPaid" id="premiumUnPaid" value=False>
@@ -73,20 +77,26 @@
             </div>
         </div>
         <table id="customers">
-        {% for column in column_names %}
-            <th>{{ column }}</th>
-        {% endfor %}
-        {% for due in due_list %}
-            <tr>
-                <td>{{ due.policy.client.full_name }}</td>
-                <td>{{ due.policy.client.email }}</td>
-                <td>{{ due.policy.client.mobile_number }}</td>
-                <td>{{ due.policy.number }}</td>
-                <td>{{ due.due_date }}</td>
-                <td>{{ due.grace_date }}</td>
-                <td id={{ due.id }} class="premium_paid">{{ due.premium_paid }}</td>
-            </tr>
-        {% endfor %}
+            <thead>
+                <tr>
+                {% for column in column_names %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for due in due_list %}
+                <tr>
+                    <td>{{ due.policy.client.full_name }}</td>
+                    <td>{{ due.policy.client.email }}</td>
+                    <td>{{ due.policy.client.mobile_number }}</td>
+                    <td>{{ due.policy.number }}</td>
+                    <td>{{ due.due_date_formatted }}</td>
+                    <td>{{ due.grace_date }}</td>
+                    <td id={{ due.id }} class="premium_paid">{{ due.premium_paid }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
         </table>
     {% else %}
         <p>No Dues.</p>
