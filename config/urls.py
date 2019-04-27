@@ -1,4 +1,4 @@
-"""mysite URL Configuration
+"""config URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
@@ -19,7 +19,7 @@ from django.views.generic.base import RedirectView
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='lic/')),
-    path('lic/', include('lic.urls')),
+    path('', RedirectView.as_view(url='insurance/')),
+    path('insurance/', include('insurance.urls')),
     path('admin/', admin.site.urls),
 ]

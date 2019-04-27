@@ -1,7 +1,7 @@
 def_port=8000
 def_ip=127.0.0.1
 
-python3 manage.py makemigrations lic
+python3 manage.py makemigrations insurance
 python3 manage.py migrate
 while [[ 1 ]]
 do

@@ -1,16 +1,16 @@
 # python3 manage.py runcrons --force
-# python3 manage.py runcrons "lic.cron.SampleCronJob"
+# python3 manage.py runcrons "insurance.cron.SampleCronJob"
 
 import datetime
 from django_cron import CronJobBase, Schedule
-from lic.models import Policy, Due, Reminder
-from lic.sendmail_html import send_reminder_mail
+from insurance.models import Policy, Due, Reminder
+from insurance.sendmail_html import send_reminder_mail
 
 class SampleCronJob(CronJobBase):
     RUN_EVERY_MINS = 1440 # every 24 hours
 
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'lic.sampleCron'
+    code = 'insurance.sampleCron'
 
     def create_dues(self):
         for policy in Policy.objects.all():

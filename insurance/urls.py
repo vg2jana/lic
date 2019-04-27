@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 
-app_name = "lic"
+app_name = "insurance"
 urlpatterns = [
     # Root page
     path('', views.index, name='index'),

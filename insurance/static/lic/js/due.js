@@ -2,7 +2,7 @@ function populate_due_modal(due_id) {
     document.getElementsByClassName('due-form-premium').id = due_id;
     $.ajax({
         type: 'GET',
-        url: '/lic/due_json/' + due_id,
+        url: '/insurance/due_json/' + due_id,
         data: $(this).serialize(),
         dataType: 'json',
         success: function (data) {
@@ -52,7 +52,7 @@ $(document).ready( function () {
         e.preventDefault();
         $.ajax({
             type: "POST",
-            url: "/lic/due_submit/" + document.getElementsByClassName('due-form-premium').id,
+            url: "/insurance/due_submit/" + document.getElementsByClassName('due-form-premium').id,
             data: $('form.due-form').serialize(),
             success: function(response) {
                 $("#duemodal").modal('hide');
