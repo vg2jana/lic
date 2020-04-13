@@ -14,8 +14,7 @@ from django_tables2 import RequestConfig
 
 class ClientDetailView(generic.DetailView):
     model = Client
-    # DOCS: template name is client_detail
-    template_name = 'lic/client_detail.html'
+    template_name = 'client_detail.html'
 
     # Use this to pass any extra information
     def get_context_data(self, **kwargs):
@@ -51,7 +50,7 @@ def dues(request):
     template = loader.get_template('lic/dues.html')
     context = {
         'due_list': Due.objects.all(),
-        'column_names': ("Name", "Email ID", "Mobile number", "Policy number", "Due date", "Grace date", "Premium paid")
+        'column_names': ("Name", "Email ID", "Mobile number", "Policy number", "Due date", "Grace date", "Premium paid", "Next reminder")
     }
     return HttpResponse(template.render(context, request))
 

@@ -94,6 +94,7 @@
                     <td>{{ due.due_date_formatted }}</td>
                     <td>{{ due.grace_date }}</td>
                     <td id={{ due.id }} class="premium_paid">{{ due.premium_paid }}</td>
+                    <td>{{ due.next_reminder }}</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 
-app_name = "insurance"
+app_name = "lic"
 urlpatterns = [
     # Root page
     path('', views.index, name='index'),
@@ -20,7 +20,7 @@ urlpatterns = [
     path('status', views.index, name='status'),
 
     # Due submit
-    path('due_submit/<int:pk>', views.due_submit, name='status'),
+    path('due_submit/<int:pk>', views.due_submit, name='due_submit'),
 
     # Client details page
     path('<int:client_id>/', views.client_detail, name='client_detail'),
